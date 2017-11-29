@@ -11,17 +11,17 @@ namespace ObjectPrinting.Tests
         [SetUp]
         public void SetUp()
         {
-            person = new Person {Name = "Alex", Age = 19, Height = 72.5, Growth = 180.1};
-            var expectedResult = "Person\r\n\tId = Guid\r\n\tName = Alex\r\n\tHeight = 72,5\r\n\t" +
-                                 "Age = 19\r\n\tGrowth = 180,1\r\n";
+            person = new Person { Name = "Alex", Age = 19, Height = 72.5, Growth = 180.1 };
+            personDefaultId = "00000000-0000-0000-0000-000000000000";
         }
 
         private Person person;
+        private string personDefaultId;
 
         [Test]
         public void PrintingConfig_When_ExtensionMethodAndPrintntingConfigDefualt()
         {
-            var expectedResult = "Person\r\n\tId = Guid\r\n\tName = Alex\r\n\tHeight = 72,5\r\n\t" +
+            var expectedResult = $"Person\r\n\tId = {personDefaultId}\r\n\tName = Alex\r\n\tHeight = 72,5\r\n\t" +
                                  "Age = 19\r\n\tGrowth = 180,1\r\n";
             person.PrintToString().Should().BeEquivalentTo(expectedResult);
         }
@@ -29,7 +29,7 @@ namespace ObjectPrinting.Tests
         [Test]
         public void PrintingConfig_When_ExtensionMethodAndPrintntingConfigWithParametrs()
         {
-            var expectedResult = "Person\r\n\tId = Guid\r\n\tName = Al\r\n\t" +
+            var expectedResult = $"Person\r\n\tId = {personDefaultId}\r\n\tName = Al\r\n\t" +
                                  "Age = 19\r\n";
             person.PrintToString(s => s.Exclude<double>().Printing(p => p.Name).TrimmedToLength(2))
                 .Should().BeEquivalentTo(expectedResult);

@@ -51,16 +51,17 @@ namespace ObjectPrinting
         private string PrintToString(object obj, int nestingLevel)
         {
             //TODO apply configurations
-            
+
+            if (obj == null)
+                return "null" + Environment.NewLine;
+
             var finalTypes = new[]
             {
                 typeof(int), typeof(double), typeof(float), typeof(string),
-                typeof(DateTime), typeof(TimeSpan)
+                typeof(DateTime), typeof(TimeSpan), typeof(Guid)
             };
             if (finalTypes.Contains(obj.GetType()))
-            {
                 return SerializeFinalTypes(obj);
-            }
 
             var indentation = new string('\t', nestingLevel + 1);
             var sb = new StringBuilder();
@@ -68,30 +69,33 @@ namespace ObjectPrinting
             sb.AppendLine(type.Name);
             foreach (var propertyInfo in type.GetProperties().Where(p => !IsExcluding(p)))
             {
-                var propertyValue = !printingSettings.TrimmedProperties.ContainsKey(propertyInfo.Name) ? 
+                var trimmedProps = printingSettings.TrimmedProperties; 
+                var propertyValue = !trimmedProps.ContainsKey(propertyInfo.Name) ? 
                     propertyInfo.GetValue(obj):
-                    printingSettings.TrimmedProperties[propertyInfo.Name]((string)propertyInfo.GetValue(obj));
-                if (!printingSettings.SerializationModesForProperties.ContainsKey(propertyInfo.Name))
+                    trimmedProps[propertyInfo.Name]((string)propertyInfo.GetValue(obj));
+
+                var propsModes = printingSettings.SerializationModesForProperties;
+                if (!propsModes.ContainsKey(propertyInfo.Name))
                     sb.Append(indentation + propertyInfo.Name + " = " + PrintToString(propertyValue, nestingLevel + 1));
                 else
-                    sb.Append(indentation + printingSettings.SerializationModesForProperties[propertyInfo.Name](
-                                  propertyValue) + Environment.NewLine);
+                    sb.Append(indentation + propsModes[propertyInfo.Name](propertyValue) + Environment.NewLine);
             }
             return sb.ToString();
         }
 
         private string SerializeFinalTypes(object obj)
         {
-            if (obj == null)
-                return "null" + Environment.NewLine;
+            var typesModes = printingSettings.SerializationModesForTypes;
+            if (typesModes.ContainsKey(obj.GetType()))
+                return typesModes[obj.GetType()](obj) + Environment.NewLine;
 
-            if (printingSettings.SerializationModesForTypes.ContainsKey(obj.GetType()))
-                return printingSettings.SerializationModesForTypes[obj.GetType()](obj) + Environment.NewLine;
+            var culture = printingSettings.Culture;
+            if (!culture.ContainsKey(obj.GetType()))
+                return obj + Environment.NewLine;
 
-            if (!printingSettings.Culture.ContainsKey(obj.GetType())) return obj + Environment.NewLine;
-            var cultureInfo = printingSettings.Culture[obj.GetType()];
-            var objRepr = obj.GetType().GetMethod("ToString", new[] { typeof(CultureInfo) })?
-                .Invoke(obj, new[] { cultureInfo });
+            var cultureInfo = culture[obj.GetType()];
+            var objToString = obj.GetType().GetMethod("ToString", new[] {typeof(CultureInfo)});
+            var objRepr = objToString?.Invoke(obj, new[] { cultureInfo });
             return objRepr + Environment.NewLine;
         }
 
