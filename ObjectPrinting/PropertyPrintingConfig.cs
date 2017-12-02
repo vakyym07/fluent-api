@@ -29,8 +29,8 @@ namespace ObjectPrinting
             var printingSettings = ((IPrintingConfig<TOwner>) printingConfig)
                 .GetPrintingSettings;
             if (propertyName != null)
-                printingSettings.SerializationModesForProperties.Add(propertyName, p => modeFunc((TPropType)p));
-            else printingSettings.SerializationModesForTypes.Add(typeof(TPropType), p => modeFunc((TPropType)p));
+                printingSettings.SetModeForProperty(propertyName, p => modeFunc((TPropType)p));
+            else printingSettings.SetModeForType(typeof(TPropType), p => modeFunc((TPropType)p));
             return printingConfig;
         }
     }

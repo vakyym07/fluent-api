@@ -25,14 +25,14 @@ namespace ObjectPrinting
 
         public PrintingConfig<TOwner> Exclude<TPropType>()
         {
-            printingSettings.ExcludingTypes.Add(typeof(TPropType));
+            printingSettings.ExcludeType(typeof(TPropType));
             return this;
         }
 
         public PrintingConfig<TOwner> Exclude<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
         {
             var propertyName = ((MemberExpression) memberSelector.Body).Member.Name;
-            printingSettings.ExcludingProperties.Add(propertyName);
+            printingSettings.ExcludeProperty(propertyName);
             return this;
         }
 
@@ -55,12 +55,7 @@ namespace ObjectPrinting
             if (obj == null)
                 return "null" + Environment.NewLine;
 
-            var finalTypes = new[]
-            {
-                typeof(int), typeof(double), typeof(float), typeof(string),
-                typeof(DateTime), typeof(TimeSpan), typeof(Guid)
-            };
-            if (finalTypes.Contains(obj.GetType()))
+            if (IsFinalType(obj.GetType()))
                 return SerializeFinalTypes(obj);
 
             var indentation = new string('\t', nestingLevel + 1);
@@ -69,10 +64,10 @@ namespace ObjectPrinting
             sb.AppendLine(type.Name);
             foreach (var propertyInfo in type.GetProperties().Where(p => !IsExcluding(p)))
             {
-                var trimmedProps = printingSettings.TrimmedProperties; 
-                var propertyValue = !trimmedProps.ContainsKey(propertyInfo.Name) ? 
-                    propertyInfo.GetValue(obj):
-                    trimmedProps[propertyInfo.Name]((string)propertyInfo.GetValue(obj));
+                var trimmedProps = printingSettings.TrimmedProperties;
+                var propertyValue = !trimmedProps.ContainsKey(propertyInfo.Name)
+                    ? propertyInfo.GetValue(obj)
+                    : trimmedProps[propertyInfo.Name]((string) propertyInfo.GetValue(obj));
 
                 var propsModes = printingSettings.SerializationModesForProperties;
                 if (!propsModes.ContainsKey(propertyInfo.Name))
@@ -81,6 +76,11 @@ namespace ObjectPrinting
                     sb.Append(indentation + propsModes[propertyInfo.Name](propertyValue) + Environment.NewLine);
             }
             return sb.ToString();
+        }
+
+        private bool IsFinalType(Type type)
+        {
+            return type.IsPrimitive || type.IsValueType || type == typeof(string);
         }
 
         private string SerializeFinalTypes(object obj)
@@ -95,7 +95,7 @@ namespace ObjectPrinting
 
             var cultureInfo = culture[obj.GetType()];
             var objToString = obj.GetType().GetMethod("ToString", new[] {typeof(CultureInfo)});
-            var objRepr = objToString?.Invoke(obj, new[] { cultureInfo });
+            var objRepr = objToString?.Invoke(obj, new[] {cultureInfo});
             return objRepr + Environment.NewLine;
         }
 

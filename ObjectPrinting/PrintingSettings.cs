@@ -22,5 +22,35 @@ namespace ObjectPrinting
         public Dictionary<string, Func<string, string>> TrimmedProperties { get; }
         public HashSet<Type> ExcludingTypes { get; }
         public HashSet<string> ExcludingProperties { get; }
+
+        public void ExcludeType(Type type)
+        {
+            ExcludingTypes.Add(type);
+        }
+
+        public void ExcludeProperty(string property)
+        {
+            ExcludingProperties.Add(property);
+        }
+
+        public void SetModeForType(Type type, Func<object, string> mode)
+        {
+            SerializationModesForTypes.Add(type, mode);
+        }
+
+        public void SetModeForProperty(string property, Func<object, string> mode)
+        {
+            SerializationModesForProperties.Add(property, mode);
+        }
+
+        public void SetCultureForType(Type type, CultureInfo culture)
+        {
+            Culture.Add(type, culture);
+        }
+
+        public void TrimmedProperty(string property, Func<string, string> mode)
+        {
+            TrimmedProperties.Add(property, mode);
+        }
     }
 }

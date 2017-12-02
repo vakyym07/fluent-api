@@ -9,7 +9,7 @@ namespace ObjectPrinting
             this PropertyPrintingConfig<TOwner, int> propertyPrintingConfig, CultureInfo cultureInfo)
         {
             var printingConfig = ((IPropertyPrintingConfig<TOwner, int>) propertyPrintingConfig).PrintingConfig;
-            ((IPrintingConfig<TOwner>)printingConfig).GetPrintingSettings.Culture.Add(typeof(int), cultureInfo);
+            ((IPrintingConfig<TOwner>)printingConfig).GetPrintingSettings.SetCultureForType(typeof(int), cultureInfo);
             return printingConfig;
         }
 
@@ -17,7 +17,7 @@ namespace ObjectPrinting
             this PropertyPrintingConfig<TOwner, double> propertyPrintingConfig, CultureInfo cultureInfo)
         {
             var printingConfig = ((IPropertyPrintingConfig<TOwner, double>)propertyPrintingConfig).PrintingConfig;
-            ((IPrintingConfig<TOwner>)printingConfig).GetPrintingSettings.Culture.Add(typeof(double), cultureInfo);
+            ((IPrintingConfig<TOwner>)printingConfig).GetPrintingSettings.SetCultureForType(typeof(double), cultureInfo);
             return printingConfig;
         }
 
@@ -25,7 +25,7 @@ namespace ObjectPrinting
             this PropertyPrintingConfig<TOwner, long> propertyPrintingConfig, CultureInfo cultureInfo)
         {
             var printingConfig = ((IPropertyPrintingConfig<TOwner, long>)propertyPrintingConfig).PrintingConfig;
-            ((IPrintingConfig<TOwner>)printingConfig).GetPrintingSettings.Culture.Add(typeof(long), cultureInfo);
+            ((IPrintingConfig<TOwner>)printingConfig).GetPrintingSettings.SetCultureForType(typeof(long), cultureInfo);
             return printingConfig;
         }
 
@@ -34,8 +34,8 @@ namespace ObjectPrinting
         {
             var printingConfig = ((IPropertyPrintingConfig<TOwner, string>)propertyPrintingConfig).PrintingConfig;
             var propertyName = ((IPropertyPrintingConfig<TOwner, string>) propertyPrintingConfig).PropertyName;
-            ((IPrintingConfig<TOwner>)printingConfig).GetPrintingSettings.TrimmedProperties
-                .Add(propertyName, s => s.Substring(0, length));
+            ((IPrintingConfig<TOwner>)printingConfig).GetPrintingSettings
+                .TrimmedProperty(propertyName, s => s.Substring(0, length));
             return printingConfig;
         }
 
